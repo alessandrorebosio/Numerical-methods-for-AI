@@ -3,3 +3,6 @@
 
 # Ignore Visual Studio Code configuration folder
 .vscode/
+
+# Ignore Jupyter Notebook checkpoint files
+.ipynb_checkpoints
