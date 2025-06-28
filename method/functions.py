@@ -13,84 +13,102 @@ def sign(x):
 
 
 def metodo_bisezione(fname, a, b, tolX=1e-12):
-    if sign(fname(a) * fname(b)) < 0:
-        print("Non è possibile applicare il metodo di bisezione \n")
+    """
+    Metodo di bisezione per la ricerca dello zero di una funzione.
+    Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
+    """
+    if sign(fname(a) * fname(b)) >= 0:
+        print("Non è possibile applicare il metodo di bisezione")
         return None, None, None
 
-    it = []
-    while math.abs(a - b) > tolX:
-        c = (a + b) / 2
-        it.append(c)
+    xk = []
+    while abs(a - b) > tolX:
+        c = a + (b - a) / 2
+        xk.append(c)
 
         if fname(c) == 0:
-            return c, it, len(it)
+            return c, xk, len(xk)
         elif sign(fname(a) * fname(c)) < 0:
             b = c
         else:
             a = c
 
-    return c, it, len(it)
+    return c, xk, len(xk)
 
 
-def falsa_posizione(fname, a, b, max_it=100, tolX=1e-12):
-    if sign(fname(a) * fname(b)) < 0:
+def falsa_posizione(fname, a, b, max_it=100, tolX=1e-12, tolF=1e-12):
+    """
+    Metodo della falsa posizione per la ricerca dello zero di una funzione.
+    Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
+    """
+    if sign(fname(a) * fname(b)) >= 0:
         print("Metodo di bisezione non applicabile")
         return None, None, None
 
     erroreX = 1 + tolX
+    erroreF = 1 + tolF
     prec = a
-    it = []
-    while len(it) < max_it and erroreX >= tolX:
-        c = a - fname(a) * ((b - a) / (fname(a) - fname(b)))
-        it.append(c)
+    xk = []
+    while len(xk) < max_it and erroreF >= tolF and erroreX >= tolX:
+        c = a - fname(a) * ((b - a) / (fname(b) - fname(a)))
+        xk.append(c)
 
         if fname(c) == 0:
-            return c, it, len(it)
-        elif sign(fname(a) * fname(c)) < 0:
+            return c, xk, len(xk)
+        if sign(fname(a) * fname(c)) < 0:
             b = c
         else:
             a = c
 
         if c != 0:
-            erroreX = math.abs(c - prec) / math.abs(c)  # todo
+            erroreX = abs(c - prec) / abs(c)
         else:
-            erroreX = math.abs(c - prec)  # todo
+            erroreX = abs(c - prec)
 
+        erroreF = abs(fname(c))
         prec = c
 
-    return c, it, len(it)
+    return c, xk, len(xk)
 
 
 def corde(fname, coeff_ang, x0, max_it=100, tolX=1e-12, tolF=1e-12):
+    """
+    Metodo delle corde per la ricerca dello zero di una funzione.
+    Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
+    """
     # coeff_ang è il coefficiente angolare della retta che rimane fisso per tutte le iterazioni
     erroreX = 1 + tolX
     erroreF = 1 + tolF
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
+    xk = []
+    while len(xk) < max_it and erroreX >= tolX and erroreF >= tolF:
         d = fname(x0) / coeff_ang
         x1 = x0 - d
 
         if x1 != 0:
-            erroreX = math.abs(d / x1)
+            erroreX = abs(d / x1)
         else:
-            erroreX = math.abs(d)
+            erroreX = abs(d)
 
-        erroreF = math.abs(fname(x1))
-        it.append(x1)
+        erroreF = abs(fname(x1))
+        xk.append(x1)
         x0 = x1
 
-    if len(it) == max_it:
+    if len(xk) == max_it:
         print("Corde : raggiunto massimo numero di iterazioni \n")
 
-    return x1, it, len(it)
+    return x1, xk, len(xk)
 
 
 def newton(fname, fpname, x0, m=1, max_it=100, tolX=1e-12, tolF=1e-12):
+    """
+    Metodo di Newton per la ricerca dello zero di una funzione.
+    Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
+    """
     erroreX = 1 + tolX
     erroreF = 1 + tolF
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF and tolF:
-        if abs(fpname(x0) <= numpy.spacing(1)):
+    xk = []
+    while len(xk) < max_it and erroreF >= tolF and erroreX >= tolX:
+        if abs(fpname(x0)) <= numpy.spacing(1):
             print(" derivata prima nulla in x0")
             return None, None, None
 
@@ -98,60 +116,68 @@ def newton(fname, fpname, x0, m=1, max_it=100, tolX=1e-12, tolF=1e-12):
         x1 = x0 - m * d
 
         if x1 != 0:
-            erroreX = math.abs(d / x1)
+            erroreX = abs(d / x1)
         else:
-            erroreX = math.abs(d)
+            erroreX = abs(d)
 
         erroreF = numpy.abs(fname(x1))
-        it.append(x1)
+        xk.append(x1)
         x0 = x1
 
-    if len(it) == max_it:
+    if len(xk) == max_it:
         print("Newton: raggiunto massimo numero di iterazioni \n")
 
-    return x1, it, len(it)
+    return x1, xk, len(xk)
 
 
 def secanti(fname, xm1, x0, max_it=100, tolX=1e-12, tolF=1e-12):
+    """
+    Metodo delle secanti per la ricerca dello zero di una funzione.
+    Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
+    """
     erroreX = 1 + tolX
     erroreF = 1 + tolF
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
+    xk = []
+    while len(xk) < max_it and erroreX >= tolX and erroreF >= tolF:
         d = fname(x0) * (x0 - xm1) / (fname(x0) - fname(xm1))
         x1 = x0 - d
 
         if x1 != 0:
-            erroreX = math.abs(d / x1)
+            erroreX = abs(d / x1)
         else:
-            erroreX = math.abs(d)
+            erroreX = abs(d)
 
-        erroreF = math.abs(fname(x1))
-        it.append(x1)
+        erroreF = abs(fname(x1))
+        xk.append(x1)
         xm1 = x0
         x0 = x1
 
-    if len(it) == max_it:
+    if len(xk) == max_it:
         print("Secanti: raggiunto massimo numero di iterazioni \n")
 
-    return x1, it, len(it)
+    return x1, xk, len(xk)
 
 
 def stima_ordine(xk, iterazioni):
     k = iterazioni - 4
     return numpy.log(
-        abs(xk[k + 2] - xk[k + 3]) / math.abs(xk[k + 1] - xk[k + 2])
-    ) / numpy.log(math.abs(xk[k + 1] - xk[k + 2]) / math.abs(xk[k] - xk[k + 1]))
+        abs(xk[k + 2] - xk[k + 3]) / abs(xk[k + 1] - xk[k + 2])
+    ) / numpy.log(abs(xk[k + 1] - xk[k + 2]) / abs(xk[k] - xk[k + 1]))
 
 
 # Soluzione di sistemi di equazioni non lineari
 def newton_raphson(
     initial_guess, F_numerical, J_Numerical, max_it=100, tolX=1e-12, tolF=1e-12
 ):
+    """
+    Metodo di Newton-Raphson per la risoluzione di sistemi di equazioni non lineari.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     X = numpy.array(initial_guess, dtype=float)
     erroreF = 1 + tolF
     erroreX = 1 + tolX
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
+    er = []
+    while len(er) < max_it and erroreX >= tolX and erroreF >= tolF:
         jx = J_Numerical(*X)
         if numpy.linalg.det(jx) == 0:
             print(
@@ -170,20 +196,24 @@ def newton_raphson(
             erroreX = numpy.linalg.norm(s, 1)
 
         erroreF = numpy.linalg.norm(F_numerical(*X).squeeze(), 1)
-        it.append(erroreX)
+        er.append(erroreX)
 
-    return X, it, len(it)
+    return X, er, len(er)
 
 
 def newton_raphson_corde(
     initial_guess, F_numerical, J_Numerical, max_it=100, tolX=1e-12, tolF=1e-12
 ):
+    """
+    Variante del metodo di Newton-Raphson che utilizza un'approccio a corde.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     X = numpy.array(initial_guess, dtype=float)
     erroreF = 1 + tolF
     erroreX = 1 + tolX
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
-        if len(it) == 0:
+    er = []
+    while len(er) < max_it and erroreX >= tolX and erroreF >= tolF:
+        if len(er) == 0:
             jx = J_Numerical(*X)
             if numpy.linalg.det(jx) == 0:
                 print(
@@ -202,20 +232,24 @@ def newton_raphson_corde(
             erroreX = numpy.linalg.norm(s, 1)
 
         erroreF = numpy.linalg.norm(F_numerical(*X).squeeze(), 1)
-        it.append(erroreX)
+        er.append(erroreX)
 
-    return X, it, len(it)
+    return X, er, len(er)
 
 
 def newton_raphson_sham(
     initial_guess, update, F_numerical, J_Numerical, max_it=100, tolX=1e-12, tolF=1e-12
 ):
+    """
+    Variante del metodo di Newton-Raphson che prevede un aggiornamento periodico dello Jacobiano.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     X = numpy.array(initial_guess, dtype=float)
     erroreF = 1 + tolF
     erroreX = 1 + tolX
-    it = []
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
-        if len(it) % update == 0:
+    er = []
+    while len(er) < max_it and erroreX >= tolX and erroreF >= tolF:
+        if len(er) % update == 0:
             jx = J_Numerical(*X)
             if numpy.linalg.det(jx) == 0:
                 print(
@@ -234,9 +268,9 @@ def newton_raphson_sham(
             erroreX = numpy.linalg.norm(s, 1)
 
         erroreF = numpy.linalg.norm(F_numerical(*X).squeeze(), 1)
-        it.append(erroreX)
+        er.append(erroreX)
 
-    return X, it, len(it)
+    return X, er, len(er)
 
 
 # Minimo di una funzion enon lineare
@@ -248,12 +282,15 @@ def newton_raphson_minimo(
     tolX=1e-12,
     tolF=1e-12,
 ):
+    """
+    Metodo di Newton-Raphson per la ricerca del minimo di una funzione.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     X = numpy.array(initial_guess, dtype=float)
     erroreF = 1 + tolX
     erroreX = 1 + tolF
-    it = []
-
-    while len(it) < max_it and erroreX >= tolX and erroreF >= tolF:
+    er = []
+    while len(er) < max_it and erroreX >= tolX and erroreF >= tolF:
         Hx = Hessian_func(*X)
         if numpy.linalg.det(Hx) == 0:
             print(
@@ -272,53 +309,102 @@ def newton_raphson_minimo(
             erroreX = numpy.linalg.norm(s, 1)
 
         erroreF = numpy.linalg.norm(grad_func(*X).squeeze(), 1)
-        it.append(erroreX)
+        er.append(erroreX)
 
-    return X, it, len(it)
+    return X, er, len(er)
 
 
 # Metodi Iterativi basati sullo splitting della matrice: jacobi, gauss-Seidel - Gauss_seidel SOR
 def jacobi(A, b, x0, max_it=100, toll=1e-12):
+    """
+    Metodo iterativo di Jacobi per la risoluzione di sistemi lineari Ax = b.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     errore = 1000
     d = numpy.diag(A)
     n = A.shape[0]
     invM = numpy.diag(1 / d)
-    E = 0  # todo
-    F = 0  # todo
-    N = 0  # todo
-    T = 0  # todo
+
+    N = -(numpy.tril(A, -1) + numpy.triu(A, 1))
+    T = numpy.dot(invM, N)
+
     autovalori = numpy.linalg.eigvals(T)
-    raggiospettrale = 0  # todo
+    raggiospettrale = numpy.max(numpy.abs(autovalori))
     print("raggio spettrale jacobi", raggiospettrale)
 
-    it = 0
     er = []
     while len(er) <= max_it and errore >= toll:
-        x = 0  # todo
-        errore = 0  # todo
+        x = (b + N @ x0) / d.reshape(n, 1)
+        errore = numpy.linalg.norm(x - x0) / numpy.linalg.norm(x)
         er.append(errore)
         x0 = x.copy()
 
     return x, er, len(er)
 
 
+def Lsolve(L, b):
+    """
+    Risoluzione con procedura forward di Lx=b con L triangolare inferiore.
+    Restituisce la soluzione x e un flag di errore.
+    """
+    m, n = L.shape
+    if n != m or numpy.all(numpy.diag(L)) != True:
+        return [], 1
+
+    x = numpy.zeros((n, 1))
+    for i in range(n):
+        s = numpy.dot(L[i, :i], x[:i])
+        x[i] = (b[i] - s) / L[i, i]
+
+    return x, 0
+
+
+def Usolve(U, b):
+    """
+    Risoluzione con procedura backward di Ux=b con U triangolare superiore
+     Input: U matrice triangolare superiore
+            b termine noto
+    Output: x: soluzione del sistema lineare
+            flag=  0, se sono soddisfatti i test di applicabilità
+                   1, se non sono soddisfatti
+
+    """
+    m, n = U.shape
+    if n != m or numpy.all(numpy.diag(U)) != True:
+        print("errore: matrice non quadrata")
+        return [], 0
+
+    x = numpy.zeros((n, 1))
+
+    for i in range(n - 1, -1, -1):
+        s = numpy.dot(U[i, i + 1 : n], x[i + 1 : n])
+        x[i] = (b[i] - s) / U[i, i]
+
+    return x, 1
+
+
 def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
+    """
+    Metodo iterativo di Gauss-Seidel per la risoluzione di sistemi lineari Ax = b.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     errore = 1000
-    d = 0  # todo
-    D = 0  # todo
-    E = 0  # todo
-    F = 0  # todo
-    M = 0  # todo
-    N = 0  # todo
-    T = 0  # todo
+    d = numpy.diag(A)
+    D = numpy.diag(d)
+    E = numpy.tril(A, -1)
+    F = numpy.triu(A, 1)
+    M = D + E
+    N = -F
+    invM = numpy.linalg.inv(M)
+    T = invM @ N
     autovalori = numpy.linalg.eigvals(T)
-    raggiospettrale = 0  # todo
+    raggiospettrale = numpy.max(numpy.abs(autovalori))
     print("raggio spettrale Gauss-Seidel ", raggiospettrale)
 
     er = []
-    while True:  # todo
-        x = 0  # todo
-        errore = 0  # todo
+    while len(er) <= max_it and errore >= toll:
+        x, flag = Lsolve(M, b - F @ x0)
+        errore = numpy.linalg.norm(x - x0) / numpy.linalg.norm(x)
         er.append(errore)
         x0 = x.copy()
 
@@ -326,28 +412,32 @@ def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
 
 
 def gauss_seidel_sor(A, b, x0, omega, max_it=100, toll=1e-12):
+    """
+    Metodo iterativo di Gauss-Seidel SOR (Successive Over-Relaxation) per la risoluzione di sistemi lineari Ax = b.
+    Permette di accelerare la convergenza tramite il parametro omega.
+    Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
+    """
     errore = 1000
-    d = 0  # todo
-    D = 0  # todo
-    E = 0  # todo
-    F = 0  # todo
+    d = numpy.diag(A)
+    D = numpy.diag(d)
+    E = numpy.tril(A, -1)
+    F = numpy.triu(A, 1)
     Momega = D + omega * E
     Nomega = (1 - omega) * D - omega * F
-    T = 0  # todo
+    T = numpy.dot(numpy.linalg.inv(Momega), Nomega)
     autovalori = numpy.linalg.eigvals(T)
-    raggiospettrale = 0  # todo
+    raggiospettrale = numpy.max(numpy.abs(autovalori))
+    M = D + E
+    N = -F
     print("raggio spettrale Gauss-Seidel SOR ", raggiospettrale)
-
-    M = 0  # todo
-    N = 0  # todo
 
     xold = x0.copy()
     xnew = x0.copy()
     er = []
     while len(er) <= max_it and errore >= toll:
-        xtilde = 0  # todo
-        xnew = 0  # todo
-        errore = 0  # todo
+        xtilde, flag = Lsolve(M, b - numpy.dot(F, xold))
+        xnew = (1 - omega) * xold + omega * xtilde
+        errore = numpy.linalg.norm(xnew - xold) / numpy.linalg.norm(xnew)
         er.append(errore)
         xold = xnew.copy()
 
@@ -356,142 +446,162 @@ def gauss_seidel_sor(A, b, x0, omega, max_it=100, toll=1e-12):
 
 # Metodi di Discesa
 def steepestdescent(A, b, x0, max_it=100, toll=1e-12):
+    """
+    Metodo del gradiente (steepest descent) per la risoluzione di sistemi lineari Ax = b.
+    Restituisce la soluzione approssimata, la lista degli errori, la sequenza degli iterati e il numero di iterazioni.
+    """
     n, m = A.shape
     if n != m:
         print("Matrice non quadrata")
         return [], []
 
-    # inizializzare le variabili necessarie
-    x = 0
-    r = 0  # todo
-    p = 0  # todo
+    x = x0.copy()
+    r = b - A @ x
     it = 0
     nb = numpy.linalg.norm(b)
     errore = numpy.linalg.norm(r) / nb
-    vec_sol = []
-    vec_sol.append(x.copy())
-    vet_r = []
-    vet_r.append(errore)
+    vec_sol = [x.copy()]
+    vet_r = [errore]
 
-    # utilizzare il metodo del gradiente per trovare la soluzione
-    while True:  # todo
-        it = it + 1
-        Ap = 0  # todo
-        alpha = 0  # todo
-        x = 0  # todo
-
-        vec_sol.append(x.copy())
-        r = 0  # todo
+    while errore >= toll and it < max_it:
+        Ap = A @ r
+        alpha = (r.T @ r) / (r.T @ Ap)
+        x = x + alpha * r
+        r = b - A @ x
         errore = numpy.linalg.norm(r) / nb
+        vec_sol.append(x.copy())
         vet_r.append(errore)
-        p = 0  # todo
+        it += 1
 
-    iterates_array = np.vstack([arr.T for arr in vec_sol])
+    iterates_array = numpy.vstack([arr.T for arr in vec_sol])
     return x, vet_r, iterates_array, it
 
 
 def conjugate_gradient(A, b, x0, max_it=100, toll=1e-12):
+    """
+    Metodo del gradiente coniugato per la risoluzione di sistemi lineari simmetrici e definiti positivi Ax = b.
+    Restituisce la soluzione approssimata, la lista degli errori, la sequenza degli iterati e il numero di iterazioni.
+    """
     n, m = A.shape
     if n != m:
         print("Matrice non quadrata")
         return [], []
 
-    # inizializzare le variabili necessarie
-    x = x0
-
-    r = 0  # todo
-    p = 0  # todo
+    x = x0.copy()
+    r = b - A @ x
+    p = r.copy()
     it = 0
     nb = numpy.linalg.norm(b)
     errore = numpy.linalg.norm(r) / nb
-    vec_sol = []
-    vec_sol.append(x0.copy())
-    vet_r = []
-    vet_r.append(errore)
+    vec_sol = [x.copy()]
+    vet_r = [errore]
 
-    # utilizzare il metodo del gradiente coniugato per calcolare la soluzione
-    while True:  # todo
-        it = it + 1
-        Ap = 0  # todo A.dot(p)
-        alpha = 0  # todo
-        x = 0  # todo
+    while errore >= toll and it < max_it:
+        Ap = A @ p
+        rtr = r.T @ r
+        alpha = rtr / (p.T @ Ap)
+        x = x + alpha * p
+        r_new = r - alpha * Ap
+        errore = numpy.linalg.norm(r_new) / nb
         vec_sol.append(x.copy())
-        rtr_old = 0  # todo
-        r = 0  # todo
-        gamma = 0  # todo
-        errore = numpy.linalg.norm(r) / nb
         vet_r.append(errore)
-        p = 0  # todo
+        if errore < toll:
+            break
+        gamma = (r_new.T @ r_new) / rtr
+        p = r_new + gamma * p
+        r = r_new
+        it += 1
 
-    iterates_array = np.vstack([arr.T for arr in vec_sol])
+    iterates_array = numpy.vstack([arr.T for arr in vec_sol])
     return x, vet_r, iterates_array, it
 
 
 # Soluzione di sistemi sovradeterminati
 def eqnorm(A, b):
-    G = 0  # todo
-    f = 0  # todo
+    """
+    Risoluzione di sistemi sovradeterminati Ax = b tramite il metodo dei minimi quadrati normali (normal equations).
+    Restituisce la soluzione x.
+    """
+    G = A.T @ A
+    f = A.T @ b
 
-    L = 0  # todo
-    U = 0  # todo
+    L = scipy.linalg.cholesky(G, lower=True)
+    U = L.T
+
+    z, flag = Lsolve(L, f)
+    if flag == 0:
+        x, flag = Usolve(U, z)
+
     return x
 
 
 def qrLS(A, b):
-    n, m = A.shape[1]  # numero di colonne di A
+    """
+    Risoluzione di sistemi sovradeterminati Ax = b tramite la decomposizione QR.
+    Restituisce la soluzione x e il residuo.
+    """
+    n, m = A.shape
     Q, R = scipy.linalg.qr(A)
-    h = 0  # todo
-    x, _ = 0  # todo
-    residuo = 0  # todo
-    return x, residuo
+    h = Q.T @ b
+    x, _ = Usolve(R[0:n, :], h[0:n])
+
+    return x, numpy.linalg.norm(h[n:]) ** 2
 
 
 def SVDLS(A, b):
-    m, n = A.shape  # numero di righe e  numero di colonne di A
+    """
+    Risoluzione di sistemi sovradeterminati Ax = b tramite la decomposizione ai valori singolari (SVD).
+    Restituisce la soluzione x e il residuo.
+    """
+    m, n = A.shape
     U, s, VT = scipy.linalg.svd(A)
 
     V = VT.T
-    thresh = (
-        numpy.spacing(1) * m * s[0]
-    )  ##Calcolo del rango della matrice, numero dei valori singolari maggiori di una soglia
-    k = 0  # todo
+    # Calcolo del rango della matrice, numero dei valori singolari maggiori di una soglia
+    thresh = numpy.spacing(1) * m * s[0]
+    k = numpy.count_nonzero(s > thresh)
 
-    d = 0  # todo
-    d1 = 0  # todo
-    s1 = 0  # todo
+    d = U.T @ b
+    d1 = d[:k].reshape(k, 1)
+    s1 = s[:k].reshape(k, 1)
 
-    c = 0  # todo
-    x = 0  # todo
-    residuo = 0  # todo
-    return x, residuo
+    c = d1 / s1
+    x = V[:, :k] @ c
+
+    return x, numpy.linalg.norm(d[k:]) ** 2
 
 
 # -----------Interpolazione
 def plagr(xnodi, j):
+    """
+    Calcola il polinomio fondamentale di Lagrange L_j(x) associato al nodo j.
+    """
     xzeri = numpy.zeros_like(xnodi)
     n = xnodi.size
 
     if j == 0:
-        xzeri == 0  # todo
+        xzeri = xnodi[1:n]
     else:
-        xzeri = numpy.append()  # todo
+        xzeri = numpy.append(xnodi[0:j], xnodi[j + 1 : n])
 
-    num = 0
-    den = 0
+    # Calcola i coefficienti del polinomio di grado n che si annulla nel vettore xzeri
+    num = numpy.poly(xzeri)
+    # Lo valuta nel nodo escluso (-jesimo)
+    den = numpy.polyval(num, xnodi[j])
 
-    p = 0
-
-    return p
+    return num / den
 
 
 def InterpL(x, y, xx):
-    n = 0  # todo
-    m = 0  # todo
+    """
+    Interpolazione polinomiale: calcola il polinomio interpolante in xx dati i nodi x, y.
+    """
+    n = x.size
+    m = xx.size
 
     L = numpy.zeros((m, n))
+    for j in range(n):
+        p = plagr(x, j)
+        L[:, j] = numpy.polyval(p, xx)
 
-    for j in 0:  # todo
-        p = 0  # todo
-        L[:, j] = 0  # todo
-
-    return 0  # todo
+    return L @ y
