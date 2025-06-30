@@ -349,6 +349,11 @@ def Lsolve(L, b):
     """
     m, n = L.shape
     if n != m or numpy.all(numpy.diag(L)) != True:
+        print("errore: matrice non quadrata")
+        return [], 1
+
+    if numpy.all(numpy.diag(L)) != True:
+        print("el. diag. nullo - matrice triangolare inferiore")
         return [], 1
 
     x = numpy.zeros((n, 1))
@@ -370,9 +375,13 @@ def Usolve(U, b):
 
     """
     m, n = U.shape
-    if n != m or numpy.all(numpy.diag(U)) != True:
+    if n != m:
         print("errore: matrice non quadrata")
         return [], 0
+
+    if numpy.all(numpy.diag(U)) != True:
+        print("el. diag. nullo - matrice triangolare superiore")
+        return [], 1
 
     x = numpy.zeros((n, 1))
 
@@ -523,6 +532,8 @@ def eqnorm(A, b):
     Restituisce la soluzione x.
     """
     G = A.T @ A
+    condG = numpy.linalg.cond(G)
+    print("Indice di condizionamento di G ", condG)
     f = A.T @ b
 
     L = scipy.linalg.cholesky(G, lower=True)
@@ -540,7 +551,7 @@ def qrLS(A, b):
     Risoluzione di sistemi sovradeterminati Ax = b tramite la decomposizione QR.
     Restituisce la soluzione x e il residuo.
     """
-    n, m = A.shape
+    n = A.shape[1]
     Q, R = scipy.linalg.qr(A)
     h = Q.T @ b
     x, _ = Usolve(R[0:n, :], h[0:n])
@@ -560,6 +571,7 @@ def SVDLS(A, b):
     # Calcolo del rango della matrice, numero dei valori singolari maggiori di una soglia
     thresh = numpy.spacing(1) * m * s[0]
     k = numpy.count_nonzero(s > thresh)
+    print("rango =", k)
 
     d = U.T @ b
     d1 = d[:k].reshape(k, 1)
