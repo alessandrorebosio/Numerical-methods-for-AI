@@ -3,23 +3,24 @@ import scipy.linalg
 
 
 def Lsolve(L, b):
-    """
-    Risoluzione con procedura forward di Lx=b con L triangolare inferiore.
-    Restituisce la soluzione x e un flag di errore.
-    """
     m, n = L.shape
-    if n != m or np.all(np.diag(L)) != True:
+    if n != m:
         print("errore: matrice non quadrata")
         return [], 1
 
-    if np.all(np.diag(L)) != True:
+    if np.any(np.diag(L) == 0):
         print("el. diag. nullo - matrice triangolare inferiore")
         return [], 1
+
+    if b.ndim == 1:
+        b = b.reshape(-1, 1)
+    elif b.ndim == 2 and b.shape[1] != 1:
+        b = b.reshape(-1, 1)
 
     x = np.zeros((n, 1))
     for i in range(n):
         s = np.dot(L[i, :i], x[:i])
-        x[i] = (b[i] - s) / L[i, i]
+        x[i] = (b[i, 0] - s) / L[i, i]
 
     return x, 0
 
@@ -37,19 +38,25 @@ def Usolve(U, b):
     m, n = U.shape
     if n != m:
         print("errore: matrice non quadrata")
-        return [], 0
+        return [], 1
 
-    if np.all(np.diag(U)) != True:
+    if np.any(np.diag(U) == 0):
         print("el. diag. nullo - matrice triangolare superiore")
         return [], 1
+
+    # Ensure b is a column vector
+    if b.ndim == 1:
+        b = b.reshape(-1, 1)
+    elif b.ndim == 2 and b.shape[1] != 1:
+        b = b.reshape(-1, 1)
 
     x = np.zeros((n, 1))
 
     for i in range(n - 1, -1, -1):
         s = np.dot(U[i, i + 1 : n], x[i + 1 : n])
-        x[i] = (b[i] - s) / U[i, i]
+        x[i] = (b[i, 0] - s) / U[i, i]
 
-    return x, 1
+    return x, 0
 
 
 def sign(x):
@@ -396,6 +403,9 @@ def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
     Metodo iterativo di Gauss-Seidel per la risoluzione di sistemi lineari Ax = b.
     Restituisce la soluzione approssimata, la lista degli errori e il numero di iterazioni.
     """
+    if b.ndim == 1:
+        b = b.reshape(-1, 1)
+
     errore = 1000
     d = np.diag(A)
     D = np.diag(d)
@@ -412,6 +422,8 @@ def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
     er = []
     while len(er) <= max_it and errore >= toll:
         x, flag = Lsolve(M, b - F @ x0)
+        if flag == 1:  # Error in Lsolve
+            break
         errore = np.linalg.norm(x - x0) / np.linalg.norm(x)
         er.append(errore)
         x0 = x.copy()
