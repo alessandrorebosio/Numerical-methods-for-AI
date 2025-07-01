@@ -208,9 +208,9 @@ def secanti(fname, xm1, x0, max_it=100, tolX=1e-12, tolF=1e-12):
 
 def stima_ordine(xk, iterazioni):
     k = iterazioni - 4
-    return np.log(
-        abs(xk[k + 2] - xk[k + 3]) / abs(xk[k + 1] - xk[k + 2])
-    ) / np.log(abs(xk[k + 1] - xk[k + 2]) / abs(xk[k] - xk[k + 1]))
+    return np.log(abs(xk[k + 2] - xk[k + 3]) / abs(xk[k + 1] - xk[k + 2])) / np.log(
+        abs(xk[k + 1] - xk[k + 2]) / abs(xk[k] - xk[k + 1])
+    )
 
 
 # Soluzione di sistemi di equazioni non lineari
@@ -390,6 +390,7 @@ def jacobi(A, b, x0, max_it=100, toll=1e-12):
     return x, er, len(er)
 
 
+# x0 = np.zeros((b.size, 1))
 def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
     """
     Metodo iterativo di Gauss-Seidel per la risoluzione di sistemi lineari Ax = b.
@@ -411,6 +412,44 @@ def gauss_seidel(A, b, x0, max_it=100, toll=1e-12):
     er = []
     while len(er) <= max_it and errore >= toll:
         x, flag = Lsolve(M, b - F @ x0)
+        errore = np.linalg.norm(x - x0) / np.linalg.norm(x)
+        er.append(errore)
+        x0 = x.copy()
+
+    return x, er, len(er)
+
+
+def gauss_seidel1(A, b, x0, max_it=100, toll=1e-12):
+    """
+    Metodo di Gauss-Seidel usando la struttura LU per calcolare i passaggi iterativi.
+    """
+    errore = 1000
+    n = A.shape[0]
+    er = []
+
+    # --- Decomposizione LU (non è necessaria per GS, ma la usiamo come richiesto) ---
+    P, L, U = scipy.linalg.lu(A)
+
+    # Rappresentiamo A = D + L + U come: A = (D+L) + U
+    D = np.diag(np.diag(A))
+    E = np.tril(A, -1)  # parte inferiore esclusa diagonale
+    F = np.triu(A, 1)  # parte superiore esclusa diagonale
+
+    M = D + E  # matrice triangolare inferiore
+    N = -F
+
+    # Spettro della matrice iterativa T = M^{-1}N
+    invM = np.linalg.inv(M)
+    T = invM @ N
+    autovalori = np.linalg.eigvals(T)
+    raggio_spettrale = np.max(np.abs(autovalori))
+    print("Raggio spettrale Gauss-Seidel:", raggio_spettrale)
+
+    # --- Iterazione Gauss-Seidel ---
+    while len(er) <= max_it and errore >= toll:
+        # Risolvi M x = b - F x0
+        rhs = b - F @ x0
+        x = scipy.linalg.solve_triangular(M, rhs, lower=True)
         errore = np.linalg.norm(x - x0) / np.linalg.norm(x)
         er.append(errore)
         x0 = x.copy()
