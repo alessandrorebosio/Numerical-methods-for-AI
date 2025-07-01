@@ -58,6 +58,7 @@ def sign(x):
     """
     return math.copysign(1, x)
 
+
 # Zeri di funzione
 def metodo_bisezione(fname, a, b, tolX=1e-12):
     """
