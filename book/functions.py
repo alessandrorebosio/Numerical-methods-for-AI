@@ -666,16 +666,13 @@ def InterpL(x, y, xx):
 # mal condizionata e rango massimo: QRLS
 # mal condizionata e non ha rango massimo: SVDLS
 
-A = np.array()
-b = np.array()
-
 # Fattorizzazione di Gauss
-def metodo_gaus(A, b):
+def metodo_gauss(A, b):
     PT, L, U = scipy.linalg.lu(A)
     P = PT.T
     y, flag = Lsolve(L, P @ b)
     if not flag:
-        x = Usolve(U, y)
+        x, flag = Usolve(U, y)
     
     return x
 
@@ -692,6 +689,6 @@ def metodo_choleski(A, b):
     L = scipy.linalg.cholesky(A, lower=True)
     y, flag = Lsolve(L, b)
     if not flag:
-        x = Usolve(L.T, y)
+        x, flag = Usolve(L.T, y)
 
     return x
