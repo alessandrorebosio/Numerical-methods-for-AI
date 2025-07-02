@@ -26,15 +26,6 @@ def Lsolve(L, b):
 
 
 def Usolve(U, b):
-    """
-    Risoluzione con procedura backward di Ux=b con U triangolare superiore
-     Input: U matrice triangolare superiore
-            b termine noto
-    Output: x: soluzione del sistema lineare
-            flag=  0, se sono soddisfatti i test di applicabilità
-                   1, se non sono soddisfatti
-
-    """
     m, n = U.shape
     if n != m:
         print("errore: matrice non quadrata")
@@ -657,3 +648,40 @@ def InterpL(x, y, xx):
         L[:, j] = np.polyval(p, xx)
 
     return L @ y
+
+# Ax = b con m = n
+
+# piccole dimensioni e densa:
+# ben condizionata: Gauss
+# mal condizionata: QR
+# simmetrica definita positiva: Choleski
+
+# grandi dimensioni e sparsa:
+# diagonale strettamente dominante: jacobi, Gauss
+# simmetrica def. positiva: Gauss, metodo di discesa, gradiente cogniugato
+
+# Ax = b con m > n
+
+# ben condizionata e rango massimo: Equazioni normali 
+# mal condizionata e rango massimo: QRLS
+# mal condizionata e non a rango massimo: SVDLS
+
+A = np.array()
+b = np.array()
+
+# Fattorizzazione di Gauss
+P, L, U = scipy.linalg.lu(A)
+
+Pb = P @ b
+y = np.linalg.solve(L, Pb)
+x = np.linalg.solve(U, y)
+
+# Fattorizzazione QR
+Q, R = np.linalg.qr(A)
+Qt_b = Q.T @ b
+x = np.linalg.solve(R, Qt_b)
+
+# Fattorizzazione di Choleski
+L = np.linalg.cholesky(A)
+y = np.linalg.solve(L, b)
+x = np.linalg.solve(L.T, y)
