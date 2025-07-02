@@ -664,24 +664,34 @@ def InterpL(x, y, xx):
 
 # ben condizionata e rango massimo: Equazioni normali 
 # mal condizionata e rango massimo: QRLS
-# mal condizionata e non a rango massimo: SVDLS
+# mal condizionata e non ha rango massimo: SVDLS
 
 A = np.array()
 b = np.array()
 
 # Fattorizzazione di Gauss
-P, L, U = scipy.linalg.lu(A)
-
-Pb = P @ b
-y = np.linalg.solve(L, Pb)
-x = np.linalg.solve(U, y)
+def metodo_gaus(A, b):
+    PT, L, U = scipy.linalg.lu(A)
+    P = PT.T
+    y, flag = Lsolve(L, P @ b)
+    if not flag:
+        x = Usolve(U, y)
+    
+    return x
 
 # Fattorizzazione QR
-Q, R = np.linalg.qr(A)
-Qt_b = Q.T @ b
-x = np.linalg.solve(R, Qt_b)
+def metodo_householder(A, b):
+    Q, R = scipy.linalg.qr(A)
+    y = Q.T @ b
+    x, _ = Usolve(R, y)
+
+    return x
 
 # Fattorizzazione di Choleski
-L = np.linalg.cholesky(A)
-y = np.linalg.solve(L, b)
-x = np.linalg.solve(L.T, y)
+def metodo_choleski(A, b):
+    L = scipy.linalg.cholesky(A, lower=True)
+    y, flag = Lsolve(L, b)
+    if not flag:
+        x = Usolve(L.T, y)
+
+    return x
