@@ -80,3 +80,24 @@ plt.show()
 plt.contour(X, Y, superfici[0, :, :], levels=[0], colors="black")
 plt.contour(X, Y, superfici[1, :, :], levels=[0], colors="red")
 plt.show()
+
+
+def isQuadratic(A):
+    return A.shape[0] == A.shape[1]
+
+
+def isSymmetric(A):
+    return np.allclose(A, A.T)
+
+
+def isPositive(A):
+    return isSymmetric(A) and np.all(np.linalg.eigvals(A) > 0)
+
+
+def isSparse(A):
+    return np.count_nonzero(A) < A.size * 0.33
+
+
+# se ha rango massimo qrLS, sennò SVDLS
+def rank(A, b):
+    return np.linalg.matrix_rank(A) == np.linalg.matrix_rank(np.hstack([A, b]))
