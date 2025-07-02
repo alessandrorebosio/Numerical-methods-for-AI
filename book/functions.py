@@ -97,7 +97,7 @@ def falsa_posizione(fname, a, b, max_it=100, tolX=1e-12, tolF=1e-12):
     Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
     """
     if sign(fname(a) * fname(b)) >= 0:
-        print("Metodo di bisezione non applicabile")
+        print("Falsa posizione non applicabile")
         return None, None, None
 
     erroreX = 1 + tolX
@@ -131,7 +131,6 @@ def corde(fname, coeff_ang, x0, max_it=100, tolX=1e-12, tolF=1e-12):
     Metodo delle corde per la ricerca dello zero di una funzione.
     Restituisce l'approssimazione dello zero, la lista degli iterati e il numero di iterazioni.
     """
-    # coeff_ang è il coefficiente angolare della retta che rimane fisso per tutte le iterazioni
     erroreX = 1 + tolX
     erroreF = 1 + tolF
     xk = []
@@ -164,7 +163,7 @@ def newton(fname, fpname, x0, m=1, max_it=100, tolX=1e-12, tolF=1e-12):
     xk = []
     while len(xk) < max_it and erroreF >= tolF and erroreX >= tolX:
         if abs(fpname(x0)) <= np.spacing(1):
-            print(" derivata prima nulla in x0")
+            print("derivata prima nulla in x0")
             return None, None, None
 
         d = fname(x0) / fpname(x0)
@@ -439,27 +438,19 @@ def gauss_seidel1(A, b, x0, max_it=100, toll=1e-12):
     n = A.shape[0]
     er = []
 
-    # --- Decomposizione LU (non è necessaria per GS, ma la usiamo come richiesto) ---
-    P, L, U = scipy.linalg.lu(A)
-
-    # Rappresentiamo A = D + L + U come: A = (D+L) + U
     D = np.diag(np.diag(A))
-    E = np.tril(A, -1)  # parte inferiore esclusa diagonale
-    F = np.triu(A, 1)  # parte superiore esclusa diagonale
-
-    M = D + E  # matrice triangolare inferiore
+    E = np.tril(A, -1)
+    F = np.triu(A, 1)
+    M = D + E
     N = -F
 
-    # Spettro della matrice iterativa T = M^{-1}N
     invM = np.linalg.inv(M)
     T = invM @ N
     autovalori = np.linalg.eigvals(T)
     raggio_spettrale = np.max(np.abs(autovalori))
     print("Raggio spettrale Gauss-Seidel:", raggio_spettrale)
 
-    # --- Iterazione Gauss-Seidel ---
     while len(er) <= max_it and errore >= toll:
-        # Risolvi M x = b - F x0
         rhs = b - F @ x0
         x = scipy.linalg.solve_triangular(M, rhs, lower=True)
         errore = np.linalg.norm(x - x0) / np.linalg.norm(x)
@@ -617,7 +608,7 @@ def SVDLS(A, b):
     U, s, VT = scipy.linalg.svd(A)
 
     V = VT.T
-    # Calcolo del rango della matrice, numero dei valori singolari maggiori di una soglia
+
     thresh = np.spacing(1) * m * s[0]
     k = np.count_nonzero(s > thresh)
     print("rango =", k)
